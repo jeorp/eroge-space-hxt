@@ -1,7 +1,7 @@
 select 
     uid,
     title,
-    url,	
+    url,
     hitokoto,	
     touhyou,
     choubun_ress,

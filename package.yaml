@@ -5,6 +5,9 @@ dependencies:
 - text
 - bytestring
 - mtl
+- aeson
+- vector
+- unordered-containers
 - extensible
 - hxt
 - hxt-css
