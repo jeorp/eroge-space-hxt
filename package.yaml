@@ -1,0 +1,39 @@
+
+name: eroge-space-hxt
+dependencies:
+- base
+- text
+- bytestring
+- mtl
+- hxt
+- hxt-css
+- http-conduit
+- http-client
+- sqlite-simple
+- hspec
+
+library:
+  source-dirs: src
+
+executables:
+  eroge-space-hxt-exe:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:  
+    - eroge-space-hxt
+
+tests:
+  eroge-space-hxt-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - eroge-space-hxt
+
