@@ -24,7 +24,6 @@ type BrandList = Record
     "url" :> Maybe Text,
     "kind" :> Text,
     "lost" :> Bool,
-    "directlink" :> Maybe Text,
     "median" :> Maybe Text,
     "twitter" :> Maybe Text
   ]

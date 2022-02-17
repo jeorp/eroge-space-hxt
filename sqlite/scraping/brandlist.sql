@@ -5,7 +5,6 @@ select
   url,	
   kind,
   lost,	
-  directlink,	
   median,
   twitter
  from brandlist
