@@ -5,6 +5,7 @@ dependencies:
 - text
 - bytestring
 - mtl
+- extensible
 - hxt
 - hxt-css
 - http-conduit
