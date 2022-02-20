@@ -125,7 +125,7 @@ shokushuFields = ("sql/scraping/shokushuAll.sql",
     "sort_num"
  ])
 
-userviewFields = ("sql/scraping/userreviewAll.sql",
+userreviewFields = ("sql/scraping/userreviewAll.sql",
  [
     "game",
     "uid", 
@@ -161,3 +161,4 @@ userviewFields = ("sql/scraping/userreviewAll.sql",
 
 outputJsonToFile :: (String, [T.Text]) -> String -> IO ()
 outputJsonToFile set output_path = convertJson set >>= BL.writeFile output_path . encode
+
