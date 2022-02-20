@@ -34,13 +34,13 @@ atTagCase tag = deep (isElem >>> hasNameWith ((== tag') . upper . localPart))
         upper = map toUpper
 
 onTd = proc r -> do
-  a <- atTagCase "td" -< r
+  td <- atTagCase "td" -< r
   (getText <<< deep isText) <<< arr 
      (\t@(NTree a xs) -> 
        if null xs 
          then NTree a [NTree (XText "null") []] 
          else t
-     ) -< a
+     ) -< td
 
 extract =
   atTagCase "tr"
@@ -56,7 +56,7 @@ convertValues ks xs =
     let values = mapMaybe (decodeStrict . T.encodeUtf8 . T.pack) xs
     in Object $ HM.fromList $ zip ks values
 
--- @ (query path, fields) -> Json 
+-- @ (query_path, fields) -> IO Json 
 convertJson :: (String, [T.Text]) -> IO Value
 convertJson (path, keys) = Array . V.fromList . map (convertValues keys) <$> getStrings path 
 
@@ -71,6 +71,93 @@ brandlistFields = ("sql/scraping/brandlistAll.sql",
     "median",
     "twitter"
   ])
+
+createrlistFields = ("sql/scraping/createrlistAll.sql",
+  [
+    "id",
+    "name",
+    "furigana",
+    "title",
+    "url",
+    "circle",
+    "twitter_username",
+    "blog",
+    "pixiv",
+    "blog_title"
+  ])
+
+gamelistFields = ("sql/scraping/gamelistAll.sql",
+ [
+    "id", 
+    "gamename", 
+    "furigana", 
+    "sellday",
+    "brandname",
+    "median",
+    "stdev",
+    "count2",
+    "shoukai",
+    "model", 
+    "erogame"
+ ])
+
+myuserviewFields = ("sql/scraping/myuserviewAll.sql",
+ [
+    "uid",
+    "title",
+    "url",
+    "hitokoto",
+    "touhyou",
+    "choubun_ress",
+    "birth",
+    "sex"
+ ])
+
+shokushuFields = ("sql/scraping/shokushuAll.sql", 
+ [
+    "id",
+    "game",
+    "creater",
+    "shubetu",
+    "shubetu_detail",
+    "shubetu_detail_name",
+    "timestamp",
+    "sort_num"
+ ])
+
+userviewFields = ("sql/scraping/userreviewAll.sql",
+ [
+    "game",
+    "uid", 
+    "tokuten",
+    "tourokubi",
+    "hitokoto",
+    "memo",
+    "netabare",
+    "giveup",
+    "possession",
+    "play",
+    "reserve",
+    "outline",
+    "before_hitokoto",
+    "before_tokuten",
+    "before_tourokubi",
+    "display",
+    "play_tourokubi",
+    "outline_netabare",
+    "outline_tourokubi",
+    "display_unique_count",
+    "sage",
+    "before_purchase_will",
+    "before_sage",
+    "total_play_time",
+    "time_before_understanding_fun",
+    "okazu_tokuten",
+    "trial_version_hitokoto",
+    "trial_version_hitokoto_sage",
+    "trial_version_hitokoto_tourokubi",
+    "timestamp"
+ ])
 
 outputJsonToFile :: (String, [T.Text]) -> String -> IO ()
 outputJsonToFile set output_path = convertJson set >>= BL.writeFile output_path . encode
