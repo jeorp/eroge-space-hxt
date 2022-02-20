@@ -10,13 +10,16 @@ import qualified Data.Text.Encoding as T
 import qualified Data.ByteString.Lazy.Char8 as BL
 import Text.XML.HXT.Core
 import Text.XML.HXT.CSS
+
 import Control.Arrow
 import Data.Tree.NTree.TypeDefs
 
 import Data.Aeson
+import Data.Aeson.Types (parse, Result(..))
 import qualified Data.Vector as V
 import qualified Data.HashMap.Strict as HM 
 import DownloadHtml
+import Model
 
 
 
@@ -49,7 +52,8 @@ extract =
     returnA -< xs
 
 getStrings :: String -> IO [[String]]
-getStrings query_path = getHtml query_path >>= fmap tail . flip scraping extract >>= pure . map (map (\case "t" -> "true"; "f" -> "false"; s -> if (and (map isDigit s) || s == "null") then s else "\"" ++ s ++ "\""))
+getStrings query_path = getHtml query_path >>= fmap tail . flip scraping extract >>= pure . map 
+  (map (\case "t" -> "true"; "f" -> "false"; s -> let t = dropWhile (== '-') s in  if (and (map isDigit t) || s == "null") then s else "\"" ++ s ++ "\""))
 
 convertValues :: [T.Text] -> [String] -> Value
 convertValues ks xs =
@@ -101,64 +105,28 @@ gamelistFields = ("sql/scraping/gamelistAll.sql",
     "erogame"
  ])
 
-myuserviewFields = ("sql/scraping/myuserviewAll.sql",
- [
-    "uid",
-    "title",
-    "url",
-    "hitokoto",
-    "touhyou",
-    "choubun_ress",
-    "birth",
-    "sex"
- ])
-
-shokushuFields = ("sql/scraping/shokushuAll.sql", 
- [
-    "id",
-    "game",
-    "creater",
-    "shubetu",
-    "shubetu_detail",
-    "shubetu_detail_name",
-    "timestamp",
-    "sort_num"
- ])
-
-userreviewFields = ("sql/scraping/userreviewAll.sql",
- [
-    "game",
-    "uid", 
-    "tokuten",
-    "tourokubi",
-    "hitokoto",
-    "memo",
-    "netabare",
-    "giveup",
-    "possession",
-    "play",
-    "reserve",
-    "outline",
-    "before_hitokoto",
-    "before_tokuten",
-    "before_tourokubi",
-    "display",
-    "play_tourokubi",
-    "outline_netabare",
-    "outline_tourokubi",
-    "display_unique_count",
-    "sage",
-    "before_purchase_will",
-    "before_sage",
-    "total_play_time",
-    "time_before_understanding_fun",
-    "okazu_tokuten",
-    "trial_version_hitokoto",
-    "trial_version_hitokoto_sage",
-    "trial_version_hitokoto_tourokubi",
-    "timestamp"
- ])
 
 outputJsonToFile :: (String, [T.Text]) -> String -> IO ()
 outputJsonToFile set output_path = convertJson set >>= BL.writeFile output_path . encode
 
+getResults :: FromJSON a => (String, [T.Text]) -> IO (V.Vector (Result a))
+getResults set = (\(Array vs) -> fmap (parse parseJSON) vs) <$> convertJson set
+ 
+catResultsIO :: V.Vector (Result a) -> IO [a]
+catResultsIO = loop . V.toList
+  where
+    loop ((Error s): xs) = putStrLn s >> loop xs
+    loop ((Success a) : xs) = (a:) <$> loop xs
+    loop _ =  pure []
+
+getResultsWithoutError :: FromJSON a => (String, [T.Text]) -> IO [a]
+getResultsWithoutError set = getResults set >>= catResultsIO
+
+getBrandList :: IO [Brand]
+getBrandList = getResultsWithoutError brandlistFields
+
+getCreaterList :: IO [Creater]
+getCreaterList = getResultsWithoutError createrlistFields
+
+getGameList :: IO [Game]
+getGameList = getResultsWithoutError gamelistFields
