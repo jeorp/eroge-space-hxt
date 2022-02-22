@@ -25,7 +25,6 @@ postSql url query = do
 
   request' <- parseRequest url
   let 
-      body = "sql=" <> BL.pack (sql query)
       baseRequest
         = setRequestMethod "POST"
         $ setRequestSecure True
